@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korfball Match Statistics</title>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="header-left">
+                <div class="header-title">KSA STATE LEAGUE - MATCH STATISTICS</div>
+                <div class="header-sub"></div>
+            </div>
+            <div class="game-details">
+                <select id="trackingMode">
+                    <option value="both">Track Both Teams</option>
+                    <option value="home">Home Team Only</option>
+                    <option value="away">Away Team Only</option>
+                </select>
+                <select id="divisionSelect">
+                    <option value="" disabled selected hidden>Select Division</option>
+                    <option value="1">Division 1</option>
+                    <option value="2">Division 2</option>
+                </select>
+                <select id="roundSelect">
+                    <option value="" disabled selected hidden>Select Round</option>
+                </select>
+                <select id="matchSelect">
+                    <option value="" disabled selected hidden>Select Match</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="match-layout">
+            <div class="team-sheet" id="homeSheet"></div>
+            <div class="team-sheet" id="awaySheet"></div>
+        </div>
+
+        <div class="bottom-bar">
+
+            <table class="score-table">
+
+                <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th><button class="quarter-btn active" data-quarter="1">Q1</button></th>
+                        <th><button class="quarter-btn" data-quarter="2">Q2</button></th>
+                        <th><button class="quarter-btn" data-quarter="3">Q3</button></th>
+                        <th><button class="quarter-btn" data-quarter="4">Q4</button></th>
+                        <th><button class="quarter-btn" data-quarter="total">TOTAL</button></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="homeTeamLabel">Home</td>
+                        <td id="homeQ1" >0</td>
+                        <td id="homeQ2">0</td>
+                        <td id="homeQ3">0</td>
+                        <td id="homeQ4">0</td>
+                        <td id="homeTotal">0</td>
+                    </tr>
+                    <tr>
+                        <td id="awayTeamLabel">Away</td>
+                        <td id="awayQ1">0</td>
+                        <td id="awayQ2">0</td>
+                        <td id="awayQ3">0</td>
+                        <td id="awayQ4">0</td>
+                        <td id="awayTotal">0</td>
+                    </tr>
+
+            </table>
+
+            <div class="footer">
+                <button onclick="undoLastAction()">Undo</button>
+                <button onclick="resetStats()">Reset Stats</button>
+                <button onclick="saveGame()">Save Game</button>
+                <button onclick="loadGame()">Load Game</button>
+                <button onclick="exportPDF()">Export PDF</button>
+                <button onclick="showKey()">Key</button>
+                <button onclick="showLog()">Event Log</button>
+            </div>
+
+        </div>
+
+        <div id="keyModal"
+            style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:1000;justify-content:center;align-items:center;">
+            <div
+                style="background:white;border:1px solid #000000;max-width:420px;width:90%;max-height:80vh;overflow-y:auto;font-family:Arial,sans-serif;">
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #000000;">
+                    <span style="font-size:15px;font-weight:600;">Stats Key</span>
+                    <button onclick="hideKey()"
+                        style="border:none;background:none;font-size:18px;cursor:pointer;padding:0;line-height:1;">×</button>
+                </div>
+                <div style="padding:20px;">
+                    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                        <tbody>
+                            <tr>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:700;width:60px;">SA
+                                </td>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;color:#333;">Shot Attempts —
+                                    Total number of shots taken</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:700;">SM</td>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;color:#333;">Shots Made —
+                                    Total goals scored from shots</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:700;">PA</td>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;color:#333;">Penalty Attempts —
+                                    Total number of penalty shots taken</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:700;">PM</td>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;color:#333;">Penalties Made —
+                                    Total number of penalty shots scored</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:700;">AST</td>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;color:#333;">Assists — Passes
+                                    that directly lead to a goal</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:700;">REB</td>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;color:#333;">Rebounds — Regaining
+                                    possession after a missed shot on offense or defense</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:700;">STK</td>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;color:#333;">
+                                    Stocks — Combined steals, blocks and defended shots
+                                </td>
+                            </tr>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:700;">TOV</td>
+                                <td style="padding:10px 0;border-bottom:1px solid #eee;color:#333;">Turnovers — A
+                                    mistake made
+                                    that results in losing possession to the opposing team, such as a bad pass or a
+                                    violation</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:10px 0;font-weight:700;">GA</td>
+                                <td style="padding:10px 0;color:#333;">Goals Against — Goals scored on them by their
+                                    opponent
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="logModal"
+            style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:1000;justify-content:center;align-items:center;">
+
+            <div style="
+        background:white;
+        border:1px solid #ccc;
+        width:90%;
+        max-width:700px;
+        max-height:80vh;
+        overflow:hidden;
+        font-family:Arial,sans-serif;
+        display:flex;
+        flex-direction:column;
+    ">
+
+                <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:16px 20px;
+            border-bottom:1px solid #ddd;
+        ">
+
+                    <span style="font-size:15px;font-weight:600;">
+                        Event Log
+                    </span>
+
+                    <button onclick="hideLog()" style="
+                    border:none;
+                    background:none;
+                    font-size:18px;
+                    cursor:pointer;
+                ">
+                        ×
+                    </button>
+
+                </div>
+
+                <div id="logContent" style="
+                padding:16px 20px;
+                overflow-y:auto;
+                font-size:14px;
+                line-height:1.6;
+            ">
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+        <!-- Load html2canvas and jsPDF from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="statTracker.js"></script>
+</body>
+
+</html>

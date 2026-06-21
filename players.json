@@ -1,0 +1,252 @@
+[
+    {
+        "name": "Chris Graves",
+        "playing_number": 24,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "Josh Prasad",
+        "playing_number": 21,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "Jazz Zulfic",
+        "playing_number": 1,
+        "team": "Adelaide Boomers",
+        "division": 1
+        
+    },
+    {
+        "name": "Dan Phillips",
+        "playing_number": 33,
+        "team": "Adelaide Boomers",
+        "division": 1
+        
+    },
+    {
+        "name": "Aaron Sykes",
+        "playing_number": 22,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "Josh Berney",
+        "playing_number": 10,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "James Tye",
+        "playing_number": 24,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "Jess Phillips",
+        "playing_number": 19,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "Sammi Adams",
+        "playing_number": 11,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "Bethan Prasasd",
+        "playing_number": 3,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "Kia Rogers",
+        "playing_number": 24,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "Mia Gartner",
+        "playing_number": 15,
+        "team": "Adelaide Boomers",
+        "division": 1
+    },
+    {
+        "name": "Patrick Branford",
+        "playing_number": 5,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Nick Miller",
+        "playing_number": 2,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Ned Spurr",
+        "playing_number": 9,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Dane Moore",
+        "playing_number": 67,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Alyssa Booth",
+        "playing_number": 7,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Issy Vardas",
+        "playing_number": 33,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Luann Hand",
+        "playing_number": 70,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Emily Hutchesson",
+        "playing_number": 3,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Caitlin Brown",
+        "playing_number": 6,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Luke Dart",
+        "playing_number": 59,
+        "team": "Scaldis Tigers",
+        "division": 1
+    },
+    {
+        "name": "Darian Huddleston",
+        "playing_number": 6,
+        "team": "North Adelaide Roosters",
+        "division": 1
+    },
+    {
+        "name": "Cade Harris",
+        "playing_number": 10,
+        "team": "North Adelaide Roosters",
+        "division": 1
+    },
+    {
+        "name": "Tom Brown",
+        "playing_number": 19,
+        "team": "North Adelaide Roosters",
+        "division": 1
+    },
+    {
+        "name": "Liberty Booth",
+        "playing_number": 20,
+        "team": "North Adelaide Roosters",
+        "division": 1
+    },
+    {
+        "name": "Amy Chang",
+        "playing_number": 1,
+        "team": "North Adelaide Roosters",
+        "division": 1
+    },
+    {
+        "name": "Annika Richmond",
+        "playing_number": 11,
+        "team": "North Adelaide Roosters",
+        "division": 1
+    },
+    {
+        "name": "Jessica Zilm",
+        "playing_number": 12,
+        "team": "North Adelaide Roosters",
+        "division": 1
+    },
+    {
+        "name": "Amelia Vardas",
+        "playing_number": 14,
+        "team": "North Adelaide Roosters",
+        "division": 1
+    },
+    {
+        "name": "Nik Bungey",
+        "playing_number": 6,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Zac Dylan",
+        "playing_number": 8,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Dominic Priest",
+        "playing_number": 95,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Gerrard McGinley",
+        "playing_number": 8,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Owen Hodge",
+        "playing_number": 1,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Chris Hutchesson",
+        "playing_number": 22,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Matilda Hilton",
+        "playing_number": 13,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Zoe Hilton",
+        "playing_number": 14,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Lauren Bungey",
+        "playing_number": 14,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Georgia Bungey",
+        "playing_number": 9,
+        "team": "Arista Marion",
+        "division": 1
+    },
+    {
+        "name": "Will Anderson",
+        "playing_number": 10,
+        "team": "Flinders Sharks",
+        "division": 1
+    }
+
+
+]
