@@ -102,7 +102,7 @@ const teamStyles = {
     "Default": { bg: "#111111", text: "#FFFFFF" },
     "Darks": { bg: "#111111", text: "#FFFFFF" },
     "Lights": { bg: "#FFFFFF", text: "#111111" },
-    "Open Team": { bg: "#f2ff00", text: "#23b000" },
+    "Open Team": { bg: "#FFCD00", text: "#00843D" },
 };
 
 // const rosters ={
