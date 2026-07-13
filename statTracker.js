@@ -99,14 +99,10 @@ function loadSelectedMatch() {
 const stats = ['SA', 'SM', 'PA', 'PM', 'AST', 'REB', 'STK', 'TOV', 'GA'];
 
 const teamStyles = {
-    "Scaldis Tigers": { bg: "#FE5A1D", text: "#000000" },
-    "Scaldis Tigers - Black": { bg: "#000000", text: "#FE5A1D" },
-    "Adelaide Boomers": { bg: "#019e4d", text: "#590577" },
-    "North Adelaide Roosters": { bg: "#ae2e2d", text: "#FFFFFF" },
-    "Arista Marion": { bg: "#f7c407", text: "#da251e" },
-    "Flinders Sharks": { bg: "#88bfff", text: "#FFFFFF" },
-    "Flinders Sharks - Blue": { bg: "#326EBD", text: "#FFFFFF" },
-    "Default": { bg: "#111111", text: "#FFFFFF" }
+    "Default": { bg: "#111111", text: "#FFFFFF" },
+    "Darks": { bg: "#111111", text: "#FFFFFF" },
+    "Lights": { bg: "#FFFFFF", text: "#111111" },
+    "Open Team": { bg: "#f2ff00", text: "#23b000" },
 };
 
 // const rosters ={
@@ -176,13 +172,9 @@ function createTeamSheet(id, placeholder) {
                 <div class="team-header">
                     <select class="team-select">
                         <option value="" disabled selected hidden>Select Team</option>
-                        <option value="Scaldis Tigers">Scaldis Tigers</option>
-                        <option value="Scaldis Tigers - Black">Scaldis Tigers - Black</option>
-                        <option value="Adelaide Boomers">Adelaide Boomers</option>
-                        <option value="North Adelaide Roosters">North Adelaide Roosters</option>
-                        <option value="Arista Marion">Arista Marion</option>
-                        <option value="Flinders Sharks">Flinders Sharks</option>
-                        <option value="Flinders Sharks - Blue">Flinders Sharks - Blue</option>
+                        <option value="Darks">Darks</option>
+                        <option value="Lights">Lights</option>
+                        <option value="Open Team">Open Team</option>
                     </select>
                 </div>
                 ${createDivision('First Attack')}
