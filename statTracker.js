@@ -174,32 +174,9 @@ function createTeamSheet(id, placeholder) {
                     </select>
                 </div>
                 ${createDivision('Players')}
-                ${createDivision('Substitutes', true)}
-                <div class="division-title">ATTACKING TOTALS</div>
-                <table class="stats-table">
-                    <thead>
-                        <tr>
-                            <th></th><th>SA</th><th>SM</th><th>PA</th><th>PM</th>
-                            <th>AST</th><th>O-REB</th><th>STK</th><th>TOV</th><th>GA</th>
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr class="totals-row">
-                            <td>TOTAL</td>
-                            <td class="total-sa">0</td><td class="total-sm">0</td>
-                            <td class="total-pa">0</td><td class="total-pm">0</td>
-                            <td class="total-ast">0</td><td class="total-reb">0</td>
-                            <td class="total-stk">0</td><td class="total-tov">0</td>
-                            <td class="total-ga">0</td>
-                        </tr>
-                        <tr class="totals-row percentage-row">
-                            <td></td>
-                            <td colspan="2" class="divisionFG">0%</td>
-                            <td colspan="2" class="divisionPen">0%</td>
-                            <td></td><td></td><td></td><td></td><td></td>
-                        </tr>
-                    </tfoot>
-                </table>
+                ${createDivision('Substitutes')}
+
+                ${createTotals()}
             `;
     populatePlayers(container);
 }
@@ -238,6 +215,225 @@ function createDivision(name, isSubstitutes = false) {
                     </table>
                 </div>
             `;
+}
+
+function createTotals() {
+
+    return `
+    
+    <div class="team-totals">
+
+        <div class="team-totals-grid">
+
+            <div class="totals-panel">
+
+                <div class="totals-panel-title">
+                    Team Attacking
+                </div>
+
+                ${totalControlRow("Total Possessions","atkPoss")}
+                ${totalControlRow("No Shot Attacks","noShot")}
+
+                ${totalValueRow("Shot Attempts","teamSA")}
+                ${totalValueRow("Goals","teamGoals",true)}
+                ${totalValueRow("Goal %","goalPercent")}
+
+            </div>
+
+            <div class="totals-panel">
+
+                <div class="totals-panel-title">
+                    Goal Types
+                </div>
+
+                ${totalValueRow("Run In","goalRunIn")}
+                ${totalValueRow("Near","goalNear")}
+                ${totalValueRow("Mid Range","goalMid")}
+                ${totalValueRow("Long Range","goalLong")}
+                ${totalValueRow("Penalty","goalPenalty")}
+                ${totalValueRow("Free Pass","goalFreePass")}
+
+            </div>
+
+        </div>
+
+        <div class="totals-panel defending-panel">
+
+            <div class="totals-panel-title">
+                Team Defending
+            </div>
+
+            ${totalControlRow("Total Possessions","defPoss")}
+            ${totalControlRow("No Shot Forced","noShotForced")}
+
+            ${totalValueRow("Shots Against","shotsAgainst")}
+            ${totalValueRow("Goals Against","goalsAgainst",true)}
+            ${totalValueRow("Forced Errors","forcedErrors")}
+            ${totalValueRow("Shot Clock Violations","shotClock")}
+            ${totalValueRow("Offensive Rebounds","offRebounds")}
+            ${totalValueRow("Defensive Rebounds","defRebounds")}
+            ${totalValueRow("Stocks","stocks")}
+
+        </div>
+
+    </div>
+
+    `;
+
+}
+
+function totalValueRow(label, stat, highlight = false){
+
+    return `
+
+        <div class="stat-row">
+
+            <span class="stat-label">${label}</span>
+
+            <span
+                class="stat-val ${highlight ? "highlight" : ""}"
+                data-stat="${stat}">
+                0
+            </span>
+
+        </div>
+
+    `;
+
+}
+
+function totalControlRow(label, stat){
+
+    return `
+
+        <div class="stat-row">
+
+            <span class="stat-label">${label}</span>
+
+            <div class="team-control">
+
+                <button
+                    class="team-minus"
+                    data-stat="${stat}">
+                    -
+                </button>
+
+                <span
+                    class="stat-val"
+                    data-stat="${stat}">
+                    0
+                </span>
+
+                <button
+                    class="team-plus"
+                    data-stat="${stat}">
+                    +
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+function setTotal(sheet, stat, value) {
+
+    const el = sheet.querySelector(
+        `[data-stat="${stat}"]`
+    );
+
+    if (el) {
+        el.textContent = value;
+    }
+
+}
+
+function sumStat(sheet, statName) {
+
+    let total = 0;
+
+    sheet.querySelectorAll(`[data-stat="${statName}"]`).forEach(el => {
+        total += Number(el.dataset.total || 0);
+    });
+
+    return total;
+
+}
+
+function updateTotals(sheet) {
+
+    //-----------------------------------
+    // Player totals
+    //-----------------------------------
+
+    const SA = sumStat(sheet, "SA");
+    const SM = sumStat(sheet, "SM");
+    const PA = sumStat(sheet, "PA");
+    const PM = sumStat(sheet, "PM");
+    const STK = sumStat(sheet, "STK");
+
+    //-----------------------------------
+    // Goals
+    //-----------------------------------
+
+    const goals = SM + PM;
+
+    const attempts = SA + PA;
+
+    const percent =
+        attempts
+            ? ((goals / attempts) * 100).toFixed(1) + "%"
+            : "0%";
+
+    setTotal(sheet, "teamSA", attempts);
+    setTotal(sheet, "teamGoals", goals);
+    setTotal(sheet, "goalPercent", percent);
+
+    //-----------------------------------
+    // Penalties
+    //-----------------------------------
+
+    setTotal(sheet, "goalPenalty", PM);
+
+    //-----------------------------------
+    // Goal Types
+    //-----------------------------------
+
+    const sheetId = sheet.id;
+
+    setTotal(sheet, "goalRunIn",
+        goalTypeCounts[sheetId]["Run In"] || 0);
+
+    setTotal(sheet, "goalNear",
+        goalTypeCounts[sheetId]["Near"] || 0);
+
+    setTotal(sheet, "goalMid",
+        goalTypeCounts[sheetId]["Mid Range"] || 0);
+
+    setTotal(sheet, "goalLong",
+        goalTypeCounts[sheetId]["Long Range"] || 0);
+
+    setTotal(sheet, "goalFreePass",
+        goalTypeCounts[sheetId]["Free Pass"] || 0);
+
+    //-----------------------------------
+    // Rebounds
+    //-----------------------------------
+
+    setTotal(sheet, "offRebounds",
+        reboundTypeCounts[sheetId]["Offensive"] || 0);
+
+    setTotal(sheet, "defRebounds",
+        reboundTypeCounts[sheetId]["Defensive"] || 0);
+
+    //-----------------------------------
+    // Stocks
+    //-----------------------------------
+
+    setTotal(sheet, "stocks", STK);
+
 }
 
 function populatePlayers(container) {
@@ -606,18 +802,27 @@ function updateAll() {
 
         const allTables = sheet.querySelectorAll('.stats-table');
         const totalTable = allTables[allTables.length - 1];
-        totalTable.querySelector('.total-sa').innerText = teamShots;
-        totalTable.querySelector('.total-sm').innerText = teamGoals;
-        totalTable.querySelector('.total-pa').innerText = teamPens;
-        totalTable.querySelector('.total-pm').innerText = teamPM;
-        totalTable.querySelector('.total-ast').innerText = teamAst;
-        totalTable.querySelector('.total-reb').innerText = teamReb;
-        totalTable.querySelector('.total-stk').innerText = teamStk;
-        totalTable.querySelector('.total-tov').innerText = teamTov;
-        totalTable.querySelector('.total-ga').innerText = teamGa;
-        totalTable.querySelector('.divisionFG').innerText = teamShots > 0 ? ((teamGoals / teamShots) * 100).toFixed(1) + '%' : '0%';
-        totalTable.querySelector('.divisionPen').innerText = teamPens > 0 ? ((teamPM / teamPens) * 100).toFixed(1) + '%' : '0%';
-    });
+
+        const home = document.getElementById("homeSheet");
+        const away = document.getElementById("awaySheet");
+
+        setTotal(home,
+            "shotsAgainst",
+            sumStat(away, "SA") + sumStat(away, "PA"));
+
+        setTotal(home,
+            "goalsAgainst",
+            sumStat(away, "SM") + sumStat(away, "PM"));
+
+        setTotal(away,
+            "shotsAgainst",
+            sumStat(home, "SA") + sumStat(home, "PA"));
+
+        setTotal(away,
+            "goalsAgainst",
+            sumStat(home, "SM") + sumStat(home, "PM"));
+        updateTotals(document.getElementById("homeSheet"));
+        updateTotals(document.getElementById("awaySheet")); });
 }
 
 function resetStats() {
