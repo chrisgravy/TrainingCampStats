@@ -1240,7 +1240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.value = formatted;
         });
     }
-
+    buildTeams();
     updateTrackingMode();
     updateAll();
 });
