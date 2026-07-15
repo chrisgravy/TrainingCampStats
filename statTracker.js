@@ -123,8 +123,7 @@ function createTeamSheet(id, placeholder) {
                         <option value="U21">U21</option>
                     </select>
                 </div>
-                ${createDivision('First Attack')}
-                ${createDivision('First Defence')}
+                ${createDivision('Players')}
                 ${createDivision('Substitutes', true)}
                 <div class="division-title">Team Totals</div>
                 <table class="stats-table">
@@ -193,10 +192,10 @@ function createDivision(name, isSubstitutes = false) {
 
 function populatePlayers(container) {
     const divisions = container.querySelectorAll('.players');
-    divisions.forEach((body, index) => {
-        if (index === 2) return;
-        for (let i = 0; i < 4; i++) addPlayerRow(body, false);
-    });
+
+    for (let i = 0; i < 8; i++) {
+        addPlayerRow(divisions[0], false);
+    }
 }
 
 function addPlayerRow(body, isSubstitute = false) {
@@ -576,7 +575,7 @@ function resetStats() {
 
     // Clear substitute players
     document.querySelectorAll('.players').forEach((body, index) => {
-        if (index % 3 === 2) body.innerHTML = '';
+        if (index % 2 === 1) body.innerHTML = '';
     });
 
     // Reset team selectors and colours
@@ -920,7 +919,7 @@ function exportPDF() {
 
     // Remove empty substitute rows
     element.querySelectorAll('.players').forEach((tbody, index) => {
-        if (index % 3 === 2) {
+        if (index % 2 === 1) {
             tbody.querySelectorAll('tr').forEach(row => {
                 const name = row.querySelector('.player-input')?.value.trim() || '';
                 const total = [...row.querySelectorAll('.stat-value')].reduce((s, el) => s + (parseInt(el.innerText) || 0), 0);
