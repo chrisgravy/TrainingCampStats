@@ -111,231 +111,132 @@ function closeGoalTypePopup() {
     pendingGoalMeta = null;
 }
 
-function buildTeams() {
-    const layout = document.getElementById('teamsLayout');
-    layout.innerHTML = '';
-    TEAMS.forEach(team => {
-        layout.appendChild(buildTeamBlock(team));
-    });
-}
-
-function buildTeamBlock(team) {
-    const block = document.createElement('div');
-    block.className = 'team-block';
-    block.id = `block-${team.id}`;
-
-    // Header
-    const header = document.createElement('div');
-    header.className = `team-header ${team.cls}`;
-    header.innerHTML = `<span class="team-name-display">${team.name}</span>`;
-    block.appendChild(header);
-
-    // Attacking section
-    block.appendChild(sectionTitle('Attacking Stats'));
-    block.appendChild(buildPlayerTable(team.id, 'atk', ATK_STATS));
-
-    // Team-level attacking totals + team possessions inputs
-    block.appendChild(buildAttackingTotals(team.id));
-
-    // Defending section
-    block.appendChild(sectionTitle('Defending Stats'));
-    block.appendChild(buildPlayerTable(team.id, 'def', DEF_STATS));
-
-    // Team-level defending totals + team possessions inputs
-    block.appendChild(buildDefendingTotals(team.id));
-
-    return block;
-}
-
-function sectionTitle(text) {
-    const d = document.createElement('div');
-    d.className = 'section-title';
-    d.textContent = text;
-    return d;
-}
-
-function buildPlayerTable(teamId, side, statDefs) {
-    const wrap = document.createElement('div');
-
-    const table = document.createElement('table');
-    table.className = 'player-table';
-    table.id = `table-${teamId}-${side}`;
-
-    // Header row
-    const thead = document.createElement('thead');
-    let thHtml = `<tr><th class="player-col">PLAYER</th>`;
-    statDefs.forEach(s => {
-        thHtml += `<th title="${s.title}">${s.label}</th>`;
-    });
-    thHtml += '</tr>';
-    thead.innerHTML = thHtml;
-    table.appendChild(thead);
-
-    // Body - 8 default rows
-    const tbody = document.createElement('tbody');
-    tbody.id = `tbody-${teamId}-${side}`;
-    for (let i = 0; i < 8; i++) addPlayerRow(tbody, teamId, side, statDefs);
-
-    // Totals foot
-    const tfoot = document.createElement('tfoot');
-    let tfHtml = `<tr class="totals-row"><td class="player-cell" style="padding-left:6px;font-size:10px;">TOTAL</td>`;
-    statDefs.forEach(s => {
-        tfHtml += `<td id="tot-${teamId}-${side}-${s.key}">0</td>`;
-    });
-    tfHtml += '</tr>';
-    tfoot.innerHTML = tfHtml;
-    table.appendChild(tbody);
-    table.appendChild(tfoot);
-
-    wrap.appendChild(table);
-
-    // Add player button
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-player-btn';
-    addBtn.textContent = '+ Add Player';
-    addBtn.onclick = () => {
-        addPlayerRow(tbody, teamId, side, statDefs);
-    };
-    wrap.appendChild(addBtn);
-
-    return wrap;
-}
-
-function addPlayerRow(tbody, teamId, side, statDefs) {
-    const row = document.createElement('tr');
-    let html = `<td class="player-cell"><input class="player-input" placeholder="Player"></td>`;
-    statDefs.forEach(s => {
-        html += `
-            <td>
-                <div class="stat-control">
-                    <button class="stat-btn minus" data-team="${teamId}" data-side="${side}" data-key="${s.key}">-</button>
-                    <span class="stat-value" id="" data-team="${teamId}" data-side="${side}" data-key="${s.key}">0</span>
-                    <button class="stat-btn plus"  data-team="${teamId}" data-side="${side}" data-key="${s.key}">+</button>
+function createTeamSheet(id, placeholder) {
+    const container = document.getElementById(id);
+    container.innerHTML = `
+                <div class="team-header">
+                    <select class="team-select">
+                        <option value="" disabled selected hidden>Select Team</option>
+                        <option value="Darks">Darks</option>
+                        <option value="Lights">Lights</option>
+                        <option value="Open Team">Open Team</option>
+                        <option value="U21">U21</option>
+                    </select>
                 </div>
-            </td>`;
+                ${createDivision('First Attack')}
+                ${createDivision('First Defence')}
+                ${createDivision('Substitutes', true)}
+                <div class="division-title">Team Totals</div>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th></th><th>SA</th><th>SM</th><th>PA</th><th>PM</th>
+                            <th>AST</th><th>REB</th><th>STK</th><th>TOV</th><th>GA</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr class="totals-row">
+                            <td>TOTAL</td>
+                            <td class="total-sa">0</td><td class="total-sm">0</td>
+                            <td class="total-pa">0</td><td class="total-pm">0</td>
+                            <td class="total-ast">0</td><td class="total-reb">0</td>
+                            <td class="total-stk">0</td><td class="total-tov">0</td>
+                            <td class="total-ga">0</td>
+                        </tr>
+                        <tr class="totals-row percentage-row">
+                            <td></td>
+                            <td colspan="2" class="divisionFG">0%</td>
+                            <td colspan="2" class="divisionPen">0%</td>
+                            <td></td><td></td><td></td><td></td><td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            `;
+    populatePlayers(container);
+}
+
+function createDivision(name, isSubstitutes = false) {
+    return `
+                <div class="division-title">
+                    ${name}
+                    ${isSubstitutes ? `<button class="add-sub-btn" onclick="addSubstitute(this)">+ Add Player</button>` : ''}
+                </div>
+                <div class="table-wrap">
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>PLAYER</th><th>SA</th><th>SM</th><th>PA</th><th>PM</th>
+                                <th>AST</th><th>REB</th><th>STK</th><th>TOV</th><th>GA</th>
+                            </tr>
+                        </thead>
+                        <tbody class="players"></tbody>
+                        <tfoot>
+                            <tr class="totals-row">
+                                <td>TOTAL</td>
+                                <td class="total-sa">0</td><td class="total-sm">0</td>
+                                <td class="total-pa">0</td><td class="total-pm">0</td>
+                                <td class="total-ast">0</td><td class="total-reb">0</td>
+                                <td class="total-stk">0</td><td class="total-tov">0</td>
+                                <td class="total-ga">0</td>
+                            </tr>
+                            <tr class="totals-row percentage-row">
+                                <td></td>
+                                <td colspan="2" class="divisionFG">0%</td>
+                                <td colspan="2" class="divisionPen">0%</td>
+                                <td></td><td></td><td></td><td></td><td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            `;
+}
+
+function populatePlayers(container) {
+    const divisions = container.querySelectorAll('.players');
+    divisions.forEach((body, index) => {
+        if (index === 2) return;
+        for (let i = 0; i < 4; i++) addPlayerRow(body, false);
+    });
+}
+
+function addPlayerRow(body, isSubstitute = false) {
+    const row = document.createElement('tr');
+    let html = `
+                <td class="player-cell">
+                    <div class="player-row-top">
+                        <input class="player-input" placeholder="Player">
+                        ${isSubstitute ? `<button class="remove-player-btn" onclick="removePlayer(this)">×</button>` : ''}
+                    </div>
+                </td>
+            `;
+    stats.forEach(stat => {
+        html += `
+                    <td>
+                        <div class="stat-control">
+                            <button class="stat-btn minus">-</button>
+                            <span class="stat-value"
+                            data-q1="0"
+                            data-q2="0"
+                            data-q3="0"
+                            data-q4="0">0</span>
+                            <button class="stat-btn plus">+</button>
+                        </div>
+                    </td>
+                `;
     });
     row.innerHTML = html;
-    tbody.appendChild(row);
+    body.appendChild(row);
 }
 
-function buildAttackingTotals(teamId) {
-    const wrap = document.createElement('div');
-    wrap.className = 'team-totals-grid';
-    wrap.id = `atk-totals-${teamId}`;
-
-    wrap.innerHTML = `
-        <div class="totals-panel">
-            <div class="totals-panel-title">Team Attacking</div>
-            <div class="stat-row">
-                <span class="stat-label">Total Possessions</span>
-                <div style="display:flex;align-items:center;gap:3px">
-                    <button class="stat-btn minus" data-team="${teamId}" data-side="team" data-key="atk-poss">-</button>
-                    <span class="stat-value" data-team="${teamId}" data-side="team" data-key="atk-poss">0</span>
-                    <button class="stat-btn plus"  data-team="${teamId}" data-side="team" data-key="atk-poss">+</button>
-                </div>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">No Shot Attacks</span>
-                <div style="display:flex;align-items:center;gap:3px">
-                    <button class="stat-btn minus" data-team="${teamId}" data-side="team" data-key="no-shot">-</button>
-                    <span class="stat-value" data-team="${teamId}" data-side="team" data-key="no-shot">0</span>
-                    <button class="stat-btn plus"  data-team="${teamId}" data-side="team" data-key="no-shot">+</button>
-                </div>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Shots Taken</span>
-                <span class="stat-val" id="sum-${teamId}-atk-sa">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Goals</span>
-                <span class="stat-val highlight" id="sum-${teamId}-atk-g">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Goal %</span>
-                <span class="stat-val" id="sum-${teamId}-atk-pct">0%</span>
-            </div>
-        </div>
-        <div class="totals-panel">
-            <div class="totals-panel-title">Goal Types</div>
-            <div class="stat-row">
-                <span class="stat-label">Run In</span>
-                <span class="stat-val" id="sum-${teamId}-atk-ri">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Near</span>
-                <span class="stat-val" id="sum-${teamId}-atk-nr">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Mid Range</span>
-                <span class="stat-val" id="sum-${teamId}-atk-mr">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Long Range</span>
-                <span class="stat-val" id="sum-${teamId}-atk-lr">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Penalty</span>
-                <span class="stat-val" id="sum-${teamId}-atk-pen">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Free Pass</span>
-                <span class="stat-val" id="sum-${teamId}-atk-fp">0</span>
-            </div>
-        </div>
-    `;
-    return wrap;
+function addSubstitute(button) {
+    const division = button.closest('.division-title').nextElementSibling;
+    const tbody = division.querySelector('.players');
+    addPlayerRow(tbody, true);
 }
 
-function buildDefendingTotals(teamId) {
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'border-top:1px solid #000;';
-
-    wrap.innerHTML = `
-        <div class="totals-panel" style="border-right:none;">
-            <div class="totals-panel-title" style="margin-top:8px;">Team Defending</div>
-            <div class="stat-row">
-                <span class="stat-label">Total Possessions</span>
-                <div style="display:flex;align-items:center;gap:3px">
-                    <button class="stat-btn minus" data-team="${teamId}" data-side="team" data-key="def-poss">-</button>
-                    <span class="stat-value" data-team="${teamId}" data-side="team" data-key="def-poss">0</span>
-                    <button class="stat-btn plus"  data-team="${teamId}" data-side="team" data-key="def-poss">+</button>
-                </div>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">No Shot Forced</span>
-                <div style="display:flex;align-items:center;gap:3px">
-                    <button class="stat-btn minus" data-team="${teamId}" data-side="team" data-key="no-shot-forced">-</button>
-                    <span class="stat-value" data-team="${teamId}" data-side="team" data-key="no-shot-forced">0</span>
-                    <button class="stat-btn plus"  data-team="${teamId}" data-side="team" data-key="no-shot-forced">+</button>
-                </div>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Shots Against</span>
-                <span class="stat-val" id="sum-${teamId}-def-sa">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Goals Against</span>
-                <span class="stat-val highlight" id="sum-${teamId}-def-ga">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Forced Errors</span>
-                <span class="stat-val" id="sum-${teamId}-def-fe">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Shot Clock Violations</span>
-                <span class="stat-val" id="sum-${teamId}-def-scv">0</span>
-            </div>
-            <div class="stat-row">
-                <span class="stat-label">Def. Rebounds</span>
-                <span class="stat-val" id="sum-${teamId}-def-dr">0</span>
-            </div>
-            <div class="stat-row" style="margin-bottom:8px">
-                <span class="stat-label">Int / Blk / Def</span>
-                <span class="stat-val" id="sum-${teamId}-def-ibd">0</span>
-            </div>
-        </div>
-    `;
-    return wrap;
+function removePlayer(button) {
+    button.closest('tr').remove();
+    updateAll();
 }
 
 function attachEvents() {
@@ -690,9 +591,6 @@ function resetStats() {
 
     // Reset header fields
     document.getElementById('matchDate') && (document.getElementById('matchDate').value = '');
-    document.getElementById('divisionSelect').selectedIndex = 0;
-    document.getElementById('roundSelect').selectedIndex = 0;
-    document.getElementById('matchSelect').selectedIndex = 0;
 
     // Reset all totals cells
     document.querySelectorAll('.totals-row td').forEach(td => {
@@ -860,10 +758,7 @@ function updateTrackingMode() {
 function saveGame() {
     try {
         const data = {
-            date: document.getElementById('matchDate')?.value || '',
-            division: document.getElementById('divisionSelect')?.selectedIndex || 0,
-            round: document.getElementById('roundSelect')?.selectedIndex || 0,
-            match: document.getElementById('matchSelect')?.selectedIndex || 0,
+            date: '',
             teams: [],
             goalTypes: goalTypeCounts
         };
@@ -912,11 +807,6 @@ function loadGame() {
 
         const data = JSON.parse(saved);
 
-        // Restore header fields
-        document.getElementById('matchDate').value = data.date || '';
-        document.getElementById('divisionSelect').selectedIndex = data.division || 0;
-        document.getElementById('roundSelect').selectedIndex = data.round || 0;
-        document.getElementById('matchSelect').selectedIndex = data.match || 0;
 
         if (data.goalTypes) {
             Object.keys(data.goalTypes).forEach(sheetId => {
