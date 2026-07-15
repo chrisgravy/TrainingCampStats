@@ -106,13 +106,19 @@ const teamStyles = {
     "U21": { bg: "#00843D", text: "#FFCD00" },
 };
 
-// const rosters ={
-//     "Adelaide Boomers" {
-//         "Chris Graves",
-//         "Jess Phillips",
+const GOAL_TYPES = ['Run In', 'Near', 'Mid Range', 'Long Range', 'Free Pass'];
 
-//     }
-// }
+// goalTypeCounts[sheetId][type] = count
+const goalTypeCounts = {
+    homeSheet: {},
+    awaySheet: {}
+};
+GOAL_TYPES.forEach(t => {
+    goalTypeCounts.homeSheet[t] = 0;
+    goalTypeCounts.awaySheet[t] = 0;
+});
+
+let pendingGoalMeta = null; // { valueEl, changes, sheetId }
 
 let actionHistory = [];
 let currentQuarter = 1;
@@ -165,6 +171,42 @@ function addLogEntry(player, stat, change) {
         timestamp: Date.now()
     });
 
+}
+
+function renderGoalTypeTotals(sheetId) {
+    const sheet = document.getElementById(sheetId);
+    let strip = sheet.querySelector('.goal-type-totals');
+    if (!strip) {
+        strip = document.createElement('div');
+        strip.className = 'goal-type-totals';
+        // Insert after the last stats-table
+        const allTables = sheet.querySelectorAll('.stats-table');
+        const lastTable = allTables[allTables.length - 1];
+        lastTable.closest('table').after(strip);
+    }
+    strip.innerHTML = '<span style="color:#555;font-weight:bold;margin-right:4px;">GOAL TYPES:</span>' +
+        GOAL_TYPES.map(t => `
+            <div class="goal-type-chip">
+                <span class="goal-type-chip-label">${t}:</span>
+                <span class="goal-type-chip-val">${goalTypeCounts[sheetId][t] || 0}</span>
+            </div>
+        `).join('');
+}
+
+function showGoalTypePopup(valueEl, changes, sheetId, anchorBtn) {
+    pendingGoalMeta = { valueEl, changes, sheetId };
+
+    const popup = document.getElementById('goalTypePopup');
+    const rect = anchorBtn.getBoundingClientRect();
+
+    popup.style.display = 'block';
+    popup.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+    popup.style.left = Math.min(rect.left + window.scrollX, window.innerWidth - 220) + 'px';
+}
+
+function closeGoalTypePopup() {
+    document.getElementById('goalTypePopup').style.display = 'none';
+    pendingGoalMeta = null;
 }
 
 function createTeamSheet(id, placeholder) {
@@ -322,23 +364,20 @@ function attachEvents() {
             );
             changes.push({ element: value, previous: oldValue });
             if (cellIndex === 2) {
-
+                // SM scored — auto increment SA
                 const shotAttemptValue = allValues[0];
-
                 const previous = getQuarterValue(shotAttemptValue);
-
-                setQuarterValue(
-                    shotAttemptValue,
-                    previous + 1
-                );
-
+                setQuarterValue(shotAttemptValue, previous + 1);
                 refreshDisplayedStat(shotAttemptValue);
+                changes.push({ element: shotAttemptValue, previous });
 
-                changes.push({
-                    element: shotAttemptValue,
-                    previous
-                });
+                // Find which sheet this is in
+                const sheetId = control.closest('.team-sheet')?.id || 'homeSheet';
 
+                // Show goal type popup instead of pushing to history immediately
+                // We'll push to history after goal type is picked (or cancelled)
+                showGoalTypePopup(value, changes, sheetId, e.target);
+                return; // don't push to actionHistory yet
             }
             if (cellIndex === 4) {
 
@@ -663,6 +702,12 @@ function resetStats() {
         }
     });
 
+    // Inside resetStats(), after the existing resets:
+    Object.keys(goalTypeCounts).forEach(sheetId => {
+        GOAL_TYPES.forEach(t => { goalTypeCounts[sheetId][t] = 0; });
+        renderGoalTypeTotals(sheetId);
+    });
+
     updateAll();
 }
 
@@ -818,7 +863,8 @@ function saveGame() {
             division: document.getElementById('divisionSelect')?.selectedIndex || 0,
             round: document.getElementById('roundSelect')?.selectedIndex || 0,
             match: document.getElementById('matchSelect')?.selectedIndex || 0,
-            teams: []
+            teams: [],
+            goalTypes: goalTypeCounts
         };
 
         document.querySelectorAll('.team-sheet').forEach(sheet => {
@@ -870,6 +916,17 @@ function loadGame() {
         document.getElementById('divisionSelect').selectedIndex = data.division || 0;
         document.getElementById('roundSelect').selectedIndex = data.round || 0;
         document.getElementById('matchSelect').selectedIndex = data.match || 0;
+
+        if (data.goalTypes) {
+            Object.keys(data.goalTypes).forEach(sheetId => {
+                if (goalTypeCounts[sheetId]) {
+                    GOAL_TYPES.forEach(t => {
+                        goalTypeCounts[sheetId][t] = data.goalTypes[sheetId]?.[t] || 0;
+                    });
+                    renderGoalTypeTotals(sheetId);
+                }
+            });
+        }
 
         // Restore each team
         document.querySelectorAll('.team-sheet').forEach((sheet, ti) => {
@@ -1026,7 +1083,7 @@ function exportPDF() {
     });
 
     // Convert team selects → plain team name spans
-        element.querySelectorAll('.team-select').forEach((sel, i) => {
+    element.querySelectorAll('.team-select').forEach((sel, i) => {
         const span = document.createElement('span');
         span.innerText = liveTeamNames[i] || '';
         span.style.fontWeight = 'bold';
@@ -1119,6 +1176,45 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('logModal')?.addEventListener('click', function (e) {
         if (e.target === this) hideLog();
     });
+
+    // Goal type popup
+    document.querySelectorAll('.goal-type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!pendingGoalMeta) return;
+            const { valueEl, changes, sheetId } = pendingGoalMeta;
+
+            const type = btn.dataset.type;
+            goalTypeCounts[sheetId][type] = (goalTypeCounts[sheetId][type] || 0) + 1;
+            renderGoalTypeTotals(sheetId);
+
+            // Now push the changes to history
+            actionHistory.push(changes);
+            updateAll();
+            closeGoalTypePopup();
+        });
+    });
+
+    document.getElementById('goalTypeCancel').addEventListener('click', () => {
+        if (!pendingGoalMeta) return;
+        const { valueEl, changes } = pendingGoalMeta;
+
+        // Undo the SM and SA increments since user cancelled
+        changes.forEach(c => {
+            setQuarterValue(c.element, c.previous);
+            refreshDisplayedStat(c.element);
+        });
+        updateAll();
+        closeGoalTypePopup();
+    });
+
+    // Close popup if clicking outside it
+    document.addEventListener('click', e => {
+        const popup = document.getElementById('goalTypePopup');
+        if (popup.style.display !== 'none' && !popup.contains(e.target) && !e.target.classList.contains('plus')) {
+            // treat as cancel
+            document.getElementById('goalTypeCancel').click();
+        }
+    }, true);
 
     // Date input auto-format
     const matchDate = document.getElementById('matchDate');
