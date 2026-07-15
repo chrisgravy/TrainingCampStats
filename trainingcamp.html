@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSA Training Tracker</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f0f0f0;
+            color: #111;
+            padding: 20px;
+        }
+
+        .page {
+            background: white;
+            border: 2px solid #000;
+            padding: 20px;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .header-title { font-size: 22px; font-weight: 700; letter-spacing: 1px; }
+        .header-sub   { font-size: 12px; color: #555; margin-top: 2px; }
+
+        .session-details {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .session-details input,
+        .session-details select {
+            border: 1px solid #999;
+            padding: 6px 10px;
+            font-size: 13px;
+            background: white;
+        }
+
+        /* TEAM LAYOUT */
+        .teams-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .team-block { border: 1px solid #000; }
+
+        .team-header {
+            background: #111;
+            color: white;
+            padding: 10px 12px;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .team-name-display { flex: 1; }
+
+        /* SECTION TITLES */
+        .section-title {
+            background: #d9d9d9;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+        }
+
+        /* PLAYER TABLE */
+        .player-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+
+        .player-table th {
+            background: #efefef;
+            border: 1px solid #000;
+            padding: 5px 3px;
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .player-table th.player-col { text-align: left; padding-left: 6px; }
+
+        .player-table td {
+            border: 1px solid #ccc;
+            padding: 3px 2px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .player-table td.player-cell {
+            text-align: left;
+            min-width: 90px;
+        }
+
+        .player-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 11px;
+            background: transparent;
+            padding: 1px 4px;
+        }
+
+        .stat-control {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .stat-btn {
+            width: 14px;
+            height: 14px;
+            border: 1px solid #888;
+            background: #f4f4f4;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 0;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .stat-btn:hover { background: #ddd; }
+
+        .stat-value {
+            min-width: 16px;
+            font-weight: bold;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .totals-row { background: #f2f2f2; font-weight: bold; }
+
+        .add-player-btn {
+            display: block;
+            width: 100%;
+            border: none;
+            border-top: 1px solid #ddd;
+            background: #fafafa;
+            color: #444;
+            padding: 5px;
+            font-size: 11px;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .add-player-btn:hover { background: #eee; }
+
+        /* TEAM TOTALS BLOCK */
+        .team-totals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-top: 1px solid #000;
+        }
+
+        .totals-panel {
+            padding: 8px 10px;
+            border-right: 1px solid #ccc;
+        }
+
+        .totals-panel:last-child { border-right: none; }
+
+        .totals-panel-title {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #555;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 0;
+            font-size: 11px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .stat-row:last-child { border-bottom: none; }
+
+        .stat-label { color: #444; }
+
+        .stat-val {
+            font-weight: bold;
+            min-width: 30px;
+            text-align: right;
+        }
+
+        .stat-val.highlight { color: #000; font-size: 13px; }
+
+        .pct-val { color: #555; font-size: 10px; margin-left: 4px; }
+
+        /* GOAL TYPE GRID */
+        .goal-type-section {
+            padding: 8px 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        .goal-type-title {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        .goal-types-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .goal-type-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #ddd;
+            padding: 4px 2px;
+            background: #fafafa;
+        }
+
+        .goal-type-label {
+            font-size: 9px;
+            color: #555;
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .goal-type-control {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        /* FOOTER */
+        .footer {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .footer button {
+            border: 1px solid #000;
+            background: white;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .footer button:hover { background: #efefef; }
+
+        /* TEAM COLORS */
+        .team-white  { background: #e8e8e8 !important; color: #111 !important; }
+        .team-black  { background: #111 !important;    color: #fff !important; }
+        .team-u21    { background: #1a5fa8 !important; color: #fff !important; }
+
+        @media(max-width:1100px) {
+            .teams-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <div class="header">
+        <div>
+            <div class="header-title">KSA TRAINING SESSION TRACKER</div>
+            <div class="header-sub">Record attacking and defending stats per player</div>
+        </div>
+        <div class="session-details">
+            <input type="text" id="sessionDate" placeholder="DD/MM/YYYY" maxlength="10" style="width:110px">
+            <input type="text" id="sessionNote" placeholder="Session notes (optional)" style="min-width:200px">
+        </div>
+    </div>
+
+    <div class="teams-layout" id="teamsLayout"></div>
+
+    <div class="footer">
+        <button onclick="undoLast()">Undo</button>
+        <button onclick="resetAll()">Reset</button>
+        <button onclick="saveSession()">Save</button>
+        <button onclick="loadSession()">Load</button>
+        <button onclick="exportPDF()">Export PDF</button>
+    </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// ─── CONFIG ─────────────────────────────────────────────────────────────────
+
+const TEAMS = [
+    { id: 'white', name: 'White',  cls: 'team-white' },
+    { id: 'black', name: 'Black',  cls: 'team-black'  },
+    { id: 'u21',   name: "U21's",  cls: 'team-u21'   },
+];
+
+// Attacking per-player stats (columns in the player table)
+const ATK_STATS = [
+    { key: 'sa',  label: 'SA',  title: 'Shots Attempted' },
+    { key: 'g',   label: 'G',   title: 'Goals' },
+    { key: 'ri',  label: 'RI',  title: 'Run In' },
+    { key: 'nr',  label: 'NR',  title: 'Near' },
+    { key: 'mr',  label: 'MR',  title: 'Mid Range' },
+    { key: 'lr',  label: 'LR',  title: 'Long Range' },
+    { key: 'pen', label: 'P',   title: 'Penalty' },
+    { key: 'fp',  label: 'FP',  title: 'Free Pass' },
+];
+
+// Defending per-player stats
+const DEF_STATS = [
+    { key: 'ga',   label: 'GA',  title: 'Goals Against' },
+    { key: 'fe',   label: 'FE',  title: 'Forced Errors' },
+    { key: 'scv',  label: 'SCV', title: 'Shot Clock Violations' },
+    { key: 'dr',   label: 'DR',  title: 'Defensive Rebounds' },
+    { key: 'ibd',  label: 'IBD', title: 'Intercepts / Blocks / Defended' },
+];
+
+let history = [];  // undo stack: array of {el, key, prev}
+
+// ─── BUILD UI ────────────────────────────────────────────────────────────────
+
+function buildTeams() {
+    const layout = document.getElementById('teamsLayout');
+    layout.innerHTML = '';
+    TEAMS.forEach(team => {
+        layout.appendChild(buildTeamBlock(team));
+    });
+}
+
+function buildTeamBlock(team) {
+    const block = document.createElement('div');
+    block.className = 'team-block';
+    block.id = `block-${team.id}`;
+
+    // Header
+    const header = document.createElement('div');
+    header.className = `team-header ${team.cls}`;
+    header.innerHTML = `<span class="team-name-display">${team.name}</span>`;
+    block.appendChild(header);
+
+    // Attacking section
+    block.appendChild(sectionTitle('Attacking Stats'));
+    block.appendChild(buildPlayerTable(team.id, 'atk', ATK_STATS));
+
+    // Team-level attacking totals + team possessions inputs
+    block.appendChild(buildAttackingTotals(team.id));
+
+    // Defending section
+    block.appendChild(sectionTitle('Defending Stats'));
+    block.appendChild(buildPlayerTable(team.id, 'def', DEF_STATS));
+
+    // Team-level defending totals + team possessions inputs
+    block.appendChild(buildDefendingTotals(team.id));
+
+    return block;
+}
+
+function sectionTitle(text) {
+    const d = document.createElement('div');
+    d.className = 'section-title';
+    d.textContent = text;
+    return d;
+}
+
+function buildPlayerTable(teamId, side, statDefs) {
+    const wrap = document.createElement('div');
+
+    const table = document.createElement('table');
+    table.className = 'player-table';
+    table.id = `table-${teamId}-${side}`;
+
+    // Header row
+    const thead = document.createElement('thead');
+    let thHtml = `<tr><th class="player-col">PLAYER</th>`;
+    statDefs.forEach(s => {
+        thHtml += `<th title="${s.title}">${s.label}</th>`;
+    });
+    thHtml += '</tr>';
+    thead.innerHTML = thHtml;
+    table.appendChild(thead);
+
+    // Body - 8 default rows
+    const tbody = document.createElement('tbody');
+    tbody.id = `tbody-${teamId}-${side}`;
+    for (let i = 0; i < 8; i++) addPlayerRow(tbody, teamId, side, statDefs);
+
+    // Totals foot
+    const tfoot = document.createElement('tfoot');
+    let tfHtml = `<tr class="totals-row"><td class="player-cell" style="padding-left:6px;font-size:10px;">TOTAL</td>`;
+    statDefs.forEach(s => {
+        tfHtml += `<td id="tot-${teamId}-${side}-${s.key}">0</td>`;
+    });
+    tfHtml += '</tr>';
+    tfoot.innerHTML = tfHtml;
+    table.appendChild(tbody);
+    table.appendChild(tfoot);
+
+    wrap.appendChild(table);
+
+    // Add player button
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-player-btn';
+    addBtn.textContent = '+ Add Player';
+    addBtn.onclick = () => {
+        addPlayerRow(tbody, teamId, side, statDefs);
+    };
+    wrap.appendChild(addBtn);
+
+    return wrap;
+}
+
+function addPlayerRow(tbody, teamId, side, statDefs) {
+    const row = document.createElement('tr');
+    let html = `<td class="player-cell"><input class="player-input" placeholder="Player"></td>`;
+    statDefs.forEach(s => {
+        html += `
+            <td>
+                <div class="stat-control">
+                    <button class="stat-btn minus" data-team="${teamId}" data-side="${side}" data-key="${s.key}">-</button>
+                    <span class="stat-value" id="" data-team="${teamId}" data-side="${side}" data-key="${s.key}">0</span>
+                    <button class="stat-btn plus"  data-team="${teamId}" data-side="${side}" data-key="${s.key}">+</button>
+                </div>
+            </td>`;
+    });
+    row.innerHTML = html;
+    tbody.appendChild(row);
+}
+
+function buildAttackingTotals(teamId) {
+    const wrap = document.createElement('div');
+    wrap.className = 'team-totals-grid';
+    wrap.id = `atk-totals-${teamId}`;
+
+    wrap.innerHTML = `
+        <div class="totals-panel">
+            <div class="totals-panel-title">Team Attacking</div>
+            <div class="stat-row">
+                <span class="stat-label">Total Possessions</span>
+                <div style="display:flex;align-items:center;gap:3px">
+                    <button class="stat-btn minus" data-team="${teamId}" data-side="team" data-key="atk-poss">-</button>
+                    <span class="stat-value" data-team="${teamId}" data-side="team" data-key="atk-poss">0</span>
+                    <button class="stat-btn plus"  data-team="${teamId}" data-side="team" data-key="atk-poss">+</button>
+                </div>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">No Shot Attacks</span>
+                <div style="display:flex;align-items:center;gap:3px">
+                    <button class="stat-btn minus" data-team="${teamId}" data-side="team" data-key="no-shot">-</button>
+                    <span class="stat-value" data-team="${teamId}" data-side="team" data-key="no-shot">0</span>
+                    <button class="stat-btn plus"  data-team="${teamId}" data-side="team" data-key="no-shot">+</button>
+                </div>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Shots Taken</span>
+                <span class="stat-val" id="sum-${teamId}-atk-sa">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Goals</span>
+                <span class="stat-val highlight" id="sum-${teamId}-atk-g">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Goal %</span>
+                <span class="stat-val" id="sum-${teamId}-atk-pct">0%</span>
+            </div>
+        </div>
+        <div class="totals-panel">
+            <div class="totals-panel-title">Goal Types</div>
+            <div class="stat-row">
+                <span class="stat-label">Run In</span>
+                <span class="stat-val" id="sum-${teamId}-atk-ri">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Near</span>
+                <span class="stat-val" id="sum-${teamId}-atk-nr">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Mid Range</span>
+                <span class="stat-val" id="sum-${teamId}-atk-mr">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Long Range</span>
+                <span class="stat-val" id="sum-${teamId}-atk-lr">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Penalty</span>
+                <span class="stat-val" id="sum-${teamId}-atk-pen">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Free Pass</span>
+                <span class="stat-val" id="sum-${teamId}-atk-fp">0</span>
+            </div>
+        </div>
+    `;
+    return wrap;
+}
+
+function buildDefendingTotals(teamId) {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'border-top:1px solid #000;';
+
+    wrap.innerHTML = `
+        <div class="totals-panel" style="border-right:none;">
+            <div class="totals-panel-title" style="margin-top:8px;">Team Defending</div>
+            <div class="stat-row">
+                <span class="stat-label">Total Possessions</span>
+                <div style="display:flex;align-items:center;gap:3px">
+                    <button class="stat-btn minus" data-team="${teamId}" data-side="team" data-key="def-poss">-</button>
+                    <span class="stat-value" data-team="${teamId}" data-side="team" data-key="def-poss">0</span>
+                    <button class="stat-btn plus"  data-team="${teamId}" data-side="team" data-key="def-poss">+</button>
+                </div>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">No Shot Forced</span>
+                <div style="display:flex;align-items:center;gap:3px">
+                    <button class="stat-btn minus" data-team="${teamId}" data-side="team" data-key="no-shot-forced">-</button>
+                    <span class="stat-value" data-team="${teamId}" data-side="team" data-key="no-shot-forced">0</span>
+                    <button class="stat-btn plus"  data-team="${teamId}" data-side="team" data-key="no-shot-forced">+</button>
+                </div>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Shots Against</span>
+                <span class="stat-val" id="sum-${teamId}-def-sa">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Goals Against</span>
+                <span class="stat-val highlight" id="sum-${teamId}-def-ga">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Forced Errors</span>
+                <span class="stat-val" id="sum-${teamId}-def-fe">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Shot Clock Violations</span>
+                <span class="stat-val" id="sum-${teamId}-def-scv">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Def. Rebounds</span>
+                <span class="stat-val" id="sum-${teamId}-def-dr">0</span>
+            </div>
+            <div class="stat-row" style="margin-bottom:8px">
+                <span class="stat-label">Int / Blk / Def</span>
+                <span class="stat-val" id="sum-${teamId}-def-ibd">0</span>
+            </div>
+        </div>
+    `;
+    return wrap;
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+
+document.addEventListener('click', e => {
+    const btn = e.target;
+    if (!btn.classList.contains('stat-btn')) return;
+
+    const teamId = btn.dataset.team;
+    const side   = btn.dataset.side;
+    const key    = btn.dataset.key;
+    const isPlus = btn.classList.contains('plus');
+
+    // Find the matching stat-value span in the same stat-control div
+    const control = btn.closest('.stat-control') || btn.parentElement;
+    const valueEl = control.querySelector(`.stat-value[data-key="${key}"]`)
+                 || control.querySelector('.stat-value');
+
+    if (!valueEl) return;
+
+    const prev = parseInt(valueEl.innerText) || 0;
+    const next = isPlus ? prev + 1 : Math.max(0, prev - 1);
+    if (prev === next) return;
+
+    history.push({ el: valueEl, prev });
+    valueEl.innerText = next;
+    updateTotals(teamId, side);
+});
+
+document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undoLast();
+    }
+});
+
+// ─── TOTALS ──────────────────────────────────────────────────────────────────
+
+function sumStat(teamId, side, key) {
+    let total = 0;
+    const tbody = document.getElementById(`tbody-${teamId}-${side}`);
+    if (!tbody) return 0;
+    tbody.querySelectorAll(`.stat-value[data-key="${key}"]`).forEach(el => {
+        total += parseInt(el.innerText) || 0;
+    });
+    return total;
+}
+
+function getTeamVal(teamId, key) {
+    const el = document.querySelector(`.stat-value[data-team="${teamId}"][data-side="team"][data-key="${key}"]`);
+    return el ? (parseInt(el.innerText) || 0) : 0;
+}
+
+function setEl(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = val;
+}
+
+function updateTotals(teamId) {
+    // Sum each ATK stat column
+    ATK_STATS.forEach(s => {
+        const total = sumStat(teamId, 'atk', s.key);
+        setEl(`tot-${teamId}-atk-${s.key}`, total);
+        setEl(`sum-${teamId}-atk-${s.key}`, total);
+    });
+
+    // Goal %
+    const sa  = sumStat(teamId, 'atk', 'sa');
+    const g   = sumStat(teamId, 'atk', 'g');
+    setEl(`sum-${teamId}-atk-sa`, sa);
+    setEl(`sum-${teamId}-atk-g`,  g);
+    setEl(`sum-${teamId}-atk-pct`, sa > 0 ? ((g / sa) * 100).toFixed(1) + '%' : '0%');
+
+    // Sum each DEF stat column
+    DEF_STATS.forEach(s => {
+        const total = sumStat(teamId, 'def', s.key);
+        setEl(`tot-${teamId}-def-${s.key}`, total);
+        setEl(`sum-${teamId}-def-${s.key}`, total);
+    });
+
+    // DEF shots against = ATK shots taken from opposing team
+    // (we just show the player-table SA total under def for shots against)
+    setEl(`sum-${teamId}-def-sa`, sumStat(teamId, 'def', 'ga') + '');
+}
+
+function updateAllTotals() {
+    TEAMS.forEach(t => updateTotals(t.id));
+}
+
+// ─── UNDO ────────────────────────────────────────────────────────────────────
+
+function undoLast() {
+    if (!history.length) return;
+    const { el, prev } = history.pop();
+    el.innerText = prev;
+    const teamId = el.dataset.team;
+    if (teamId) updateTotals(teamId);
+}
+
+// ─── RESET ───────────────────────────────────────────────────────────────────
+
+function resetAll() {
+    if (!confirm('Reset all stats for this session?')) return;
+    document.querySelectorAll('.stat-value').forEach(el => { el.innerText = '0'; });
+    document.querySelectorAll('.player-input').forEach(el => { el.value = ''; });
+    document.getElementById('sessionDate').value = '';
+    document.getElementById('sessionNote').value = '';
+    history = [];
+    updateAllTotals();
+}
+
+// ─── SAVE / LOAD ─────────────────────────────────────────────────────────────
+
+function saveSession() {
+    try {
+        const data = {
+            date: document.getElementById('sessionDate').value,
+            note: document.getElementById('sessionNote').value,
+            teams: {}
+        };
+
+        TEAMS.forEach(team => {
+            data.teams[team.id] = { atk: [], def: [], teamStats: {} };
+
+            ['atk', 'def'].forEach(side => {
+                const stats = side === 'atk' ? ATK_STATS : DEF_STATS;
+                const tbody = document.getElementById(`tbody-${team.id}-${side}`);
+                tbody.querySelectorAll('tr').forEach(row => {
+                    const name = row.querySelector('.player-input')?.value || '';
+                    const vals = {};
+                    stats.forEach(s => {
+                        const el = row.querySelector(`.stat-value[data-key="${s.key}"]`);
+                        vals[s.key] = el ? (parseInt(el.innerText) || 0) : 0;
+                    });
+                    data.teams[team.id][side].push({ name, vals });
+                });
+            });
+
+            // Team-level stats
+            ['atk-poss','no-shot','def-poss','no-shot-forced'].forEach(key => {
+                data.teams[team.id].teamStats[key] = getTeamVal(team.id, key);
+            });
+        });
+
+        localStorage.setItem('ksaTrainingSave', JSON.stringify(data));
+        alert('Session saved.');
+    } catch(e) {
+        alert('Save failed: ' + e.message);
+    }
+}
+
+function loadSession() {
+    try {
+        const saved = localStorage.getItem('ksaTrainingSave');
+        if (!saved) { alert('No saved session found.'); return; }
+        const data = JSON.parse(saved);
+
+        document.getElementById('sessionDate').value = data.date || '';
+        document.getElementById('sessionNote').value = data.note || '';
+
+        TEAMS.forEach(team => {
+            const td = data.teams[team.id];
+            if (!td) return;
+
+            ['atk', 'def'].forEach(side => {
+                const stats = side === 'atk' ? ATK_STATS : DEF_STATS;
+                const tbody = document.getElementById(`tbody-${team.id}-${side}`);
+                tbody.innerHTML = '';
+                td[side].forEach(row => {
+                    addPlayerRow(tbody, team.id, side, stats);
+                    const tr = tbody.lastElementChild;
+                    tr.querySelector('.player-input').value = row.name;
+                    stats.forEach(s => {
+                        const el = tr.querySelector(`.stat-value[data-key="${s.key}"]`);
+                        if (el) el.innerText = row.vals[s.key] ?? 0;
+                    });
+                });
+            });
+
+            // Team stats
+            Object.entries(td.teamStats || {}).forEach(([key, val]) => {
+                const el = document.querySelector(`.stat-value[data-team="${team.id}"][data-side="team"][data-key="${key}"]`);
+                if (el) el.innerText = val;
+            });
+
+            updateTotals(team.id);
+        });
+    } catch(e) {
+        alert('Load failed: ' + e.message);
+    }
+}
+
+// ─── EXPORT PDF ──────────────────────────────────────────────────────────────
+
+function exportPDF() {
+    if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+        alert('PDF libraries not loaded. Check your internet connection.');
+        return;
+    }
+
+    const original = document.querySelector('.page');
+    const element  = original.cloneNode(true);
+
+    const temp = document.createElement('div');
+    temp.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none;z-index:-9999;';
+    document.body.appendChild(temp);
+    temp.appendChild(element);
+
+    // Remove footer buttons
+    element.querySelectorAll('.footer, .stat-btn, .add-player-btn').forEach(el => el.remove());
+
+    const naturalWidth = original.scrollWidth;
+    element.style.cssText = `width:${naturalWidth}px;max-width:none;background:white;padding:16px;box-sizing:border-box;`;
+    const naturalHeight = element.scrollHeight;
+
+    // Sync stat values
+    const liveVals = [...original.querySelectorAll('.stat-value')];
+    element.querySelectorAll('.stat-value').forEach((el, i) => {
+        if (liveVals[i]) el.innerText = liveVals[i].innerText;
+    });
+
+    // Sync inputs
+    const liveInputs = [...original.querySelectorAll('input')];
+    element.querySelectorAll('input').forEach((input, i) => {
+        const span = document.createElement('span');
+        span.innerText = liveInputs[i]?.value ?? '';
+        span.style.fontWeight = 'bold';
+        input.replaceWith(span);
+    });
+
+    // Convert selects
+    element.querySelectorAll('select').forEach(sel => sel.remove());
+
+    // Session info header
+    const date = document.getElementById('sessionDate').value;
+    const note = document.getElementById('sessionNote').value;
+    const headerSub = element.querySelector('.header-sub');
+    if (headerSub) {
+        headerSub.innerText = [date, note].filter(Boolean).join(' — ');
+        headerSub.style.fontWeight = 'bold';
+    }
+
+    element.style.paddingBottom = '20px';
+
+    html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        width: naturalWidth,
+        windowWidth: naturalWidth,
+        scrollX: 0,
+        scrollY: 0
+    }).then(canvas => {
+        document.body.removeChild(temp);
+        const imgData  = canvas.toDataURL('image/jpeg', 1.0);
+        const pxToMm   = px => px * 25.4 / 96;
+        const MARGIN   = 20;
+        const pdfW     = pxToMm(naturalWidth)  + MARGIN;
+        const pdfH     = pxToMm(naturalHeight) + MARGIN;
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ unit: 'mm', format: [pdfW, pdfH], orientation: pdfW > pdfH ? 'landscape' : 'portrait' });
+        pdf.addImage(imgData, 'JPEG', MARGIN / 2, MARGIN / 2, pdfW - MARGIN, pdfH - MARGIN);
+        const dateStr = date.replace(/\//g, '-') || new Date().toISOString().slice(0, 10);
+        pdf.save(`KSA_Training_${dateStr}.pdf`);
+    }).catch(err => {
+        document.body.removeChild(temp);
+        alert('Export failed: ' + err.message);
+    });
+}
+
+// ─── DATE AUTO-FORMAT ────────────────────────────────────────────────────────
+
+const dateInput = document.getElementById('sessionDate');
+let deleting = false;
+dateInput.addEventListener('keydown', e => { deleting = e.key === 'Backspace'; });
+dateInput.addEventListener('input', e => {
+    let n = e.target.value.replace(/\D/g, '').slice(0, 8);
+    if (deleting) {
+        let raw = n.length <= 2 ? n : n.length <= 4 ? n.slice(0,2)+'/'+n.slice(2) : n.slice(0,2)+'/'+n.slice(2,4)+'/'+n.slice(4);
+        e.target.value = raw; return;
+    }
+    let f = '';
+    if (n.length >= 1) { f += n.slice(0,2); if (n.length >= 2) f += '/'; }
+    if (n.length >= 3) { f += n.slice(2,4); if (n.length >= 4) f += '/'; }
+    if (n.length >= 5) f += n.slice(4,8);
+    e.target.value = f;
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+
+buildTeams();
+updateAllTotals();
+</script>
+</body>
+</html>

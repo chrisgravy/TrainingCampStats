@@ -103,6 +103,7 @@ const teamStyles = {
     "Darks": { bg: "#111111", text: "#FFFFFF" },
     "Lights": { bg: "#FFFFFF", text: "#111111" },
     "Open Team": { bg: "#FFCD00", text: "#00843D" },
+    "U21": { bg: "#00843D", text: "#FFCD00" },
 };
 
 // const rosters ={
@@ -175,6 +176,7 @@ function createTeamSheet(id, placeholder) {
                         <option value="Darks">Darks</option>
                         <option value="Lights">Lights</option>
                         <option value="Open Team">Open Team</option>
+                        <option value="U21">U21</option>
                     </select>
                 </div>
                 ${createDivision('First Attack')}
