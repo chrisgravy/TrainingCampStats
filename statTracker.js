@@ -1130,11 +1130,6 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.value = formatted;
         });
     }
-    createTeamSheet('homeSheet', 'Home Team');
-    createTeamSheet('awaySheet', 'Away Team');
-    attachTeamSelectors();
-    attachQuarterButtons();
-    attachEvents();
     updateTrackingMode();
     updateAll();
 });
