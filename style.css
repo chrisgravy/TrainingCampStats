@@ -411,6 +411,62 @@
             font-weight: bold;
         }
 
+        .team-totals-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid #000;
+        }
+
+        .totals-panel {
+            padding: 8px 10px;
+        }
+
+        .totals-panel:first-child {
+            border-right: 1px solid #ccc;
+        }
+
+        .totals-panel-title {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #555;
+            margin-bottom: 6px;
+            letter-spacing: .5px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 11px;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #444;
+        }
+
+        .stat-val {
+            min-width: 32px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .stat-val.highlight {
+            font-size: 13px;
+        }
+
+        .team-control {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
         @media(max-width:1400px) {
             .match-layout {
                 grid-template-columns: 1fr;

@@ -22,6 +22,20 @@ GOAL_TYPES.forEach(t => {
 
 let pendingGoalMeta = null; // { valueEl, changes, sheetId }
 
+const REBOUND_TYPES = ['Offensive', 'Defensive'];
+
+const reboundTypeCounts = {
+    homeSheet: {},
+    awaySheet: {}
+};
+
+REBOUND_TYPES.forEach(type => {
+    reboundTypeCounts.homeSheet[type] = 0;
+    reboundTypeCounts.awaySheet[type] = 0;
+});
+
+let pendingReboundMeta = null;
+
 let actionHistory = [];
 let currentQuarter = 1;
 let eventLog = [];
@@ -111,6 +125,42 @@ function closeGoalTypePopup() {
     pendingGoalMeta = null;
 }
 
+function showReboundTypePopup(valueEl, changes, sheetId, anchorBtn) {
+    pendingReboundMeta = { valueEl, changes, sheetId };
+
+    const popup = document.getElementById('reboundTypePopup');
+    const rect = anchorBtn.getBoundingClientRect();
+
+    popup.style.display = 'block';
+    popup.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+    popup.style.left = Math.min(rect.left + window.scrollX, window.innerWidth - 220) + 'px';
+}
+
+function closeReboundTypePopup() {
+    document.getElementById('reboundTypePopup').style.display = 'none';
+    pendingReboundMeta = null;
+}
+
+function renderReboundTypeTotals(sheetId) {
+    const sheet = document.getElementById(sheetId);
+    let strip = sheet.querySelector('.rebound-type-totals');
+    if (!strip) {
+        strip = document.createElement('div');
+        strip.className = 'rebound-type-totals';
+        // Insert after the last stats-table
+        const allTables = sheet.querySelectorAll('.stats-table');
+        const lastTable = allTables[allTables.length - 1];
+        lastTable.closest('table').after(strip);
+    }
+    strip.innerHTML = '<span style="color:#555;font-weight:bold;margin-right:4px;">REBOUND TYPES:</span>' +
+        REBOUND_TYPES.map(t => `
+            <div class="rebound-type-chip">
+                <span class="rebound-type-chip-label">${t}:</span>
+                <span class="rebound-type-chip-val">${reboundTypeCounts[sheetId][t] || 0}</span>
+            </div>
+        `).join('');
+}
+
 function createTeamSheet(id, placeholder) {
     const container = document.getElementById(id);
     container.innerHTML = `
@@ -125,12 +175,12 @@ function createTeamSheet(id, placeholder) {
                 </div>
                 ${createDivision('Players')}
                 ${createDivision('Substitutes', true)}
-                <div class="division-title">Team Totals</div>
+                <div class="division-title">ATTACKING TOTALS</div>
                 <table class="stats-table">
                     <thead>
                         <tr>
                             <th></th><th>SA</th><th>SM</th><th>PA</th><th>PM</th>
-                            <th>AST</th><th>REB</th><th>STK</th><th>TOV</th><th>GA</th>
+                            <th>AST</th><th>O-REB</th><th>STK</th><th>TOV</th><th>GA</th>
                         </tr>
                     </thead>
                     <tfoot>
@@ -298,6 +348,20 @@ function attachEvents() {
                     previous
                 });
 
+            }
+            if (cellIndex === 6) { // REB
+
+                const sheetId =
+                    control.closest('.team-sheet')?.id || 'homeSheet';
+
+                showReboundTypePopup(
+                    value,
+                    changes,
+                    sheetId,
+                    e.target
+                );
+
+                return;
             }
             actionHistory.push(changes);
             updateAll();
@@ -1084,6 +1148,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    document.querySelectorAll('.rebound-type-btn').forEach(btn => {
+
+        btn.addEventListener('click', () => {
+
+            if (!pendingReboundMeta) return;
+
+            const { changes, sheetId } = pendingReboundMeta;
+
+            reboundTypeCounts[sheetId][btn.dataset.type]++;
+
+            renderReboundTypeTotals(sheetId);
+
+            actionHistory.push(changes);
+
+            updateAll();
+
+            closeReboundTypePopup();
+
+        });
+
+    });
+
     document.getElementById('goalTypeCancel').addEventListener('click', () => {
         if (!pendingGoalMeta) return;
         const { valueEl, changes } = pendingGoalMeta;
@@ -1095,6 +1181,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         updateAll();
         closeGoalTypePopup();
+    });
+
+    document.getElementById('reboundTypeCancel')
+    .addEventListener('click', () => {
+
+        if (!pendingReboundMeta) return;
+
+        pendingReboundMeta.changes.forEach(change => {
+            setQuarterValue(change.element, change.previous);
+            refreshDisplayedStat(change.element);
+        });
+
+        updateAll();
+
+        closeReboundTypePopup();
+
     });
 
     // Close popup if clicking outside it
